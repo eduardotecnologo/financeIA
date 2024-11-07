@@ -1,0 +1,2 @@
+# financeIA
+Estudos Javascript
