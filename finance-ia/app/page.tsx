@@ -1,8 +1,5 @@
-import Image from "next/image";
+const Home = () => {
+  return <h1 className="text-red-500">Página de Tranzação</h1>;
+};
 
-const Transactions = () => {
-  return <h1>Página de Tranzação</h1> 
-   
-}
-
-export default Transactions;
+export default Home;
