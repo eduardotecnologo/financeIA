@@ -1,5 +1,7 @@
+import { Button } from "./_components/ui/button";
+
 const Home = () => {
-  return <h1 className="text-red-500">Página de Tranzação</h1>;
+  return <Button>opa</Button>;
 };
 
 export default Home;
