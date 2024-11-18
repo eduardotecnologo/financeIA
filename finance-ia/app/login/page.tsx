@@ -1,7 +1,12 @@
 import Image from "next/image";
 import { Button } from "../_components/ui/button";
 import { LogInIcon } from "lucide-react";
-const LoginPage = () => {
+import { SignInButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+const LoginPage = async () => {
+  const { userId } = await auth();
+  if (userId) redirect("/");
   return (
     <div className="grid h-full grid-cols-2">
       {/*ESQUERDA*/}
@@ -19,10 +24,13 @@ const LoginPage = () => {
           monitorar suas movimentações, e fornecer insights personalizados,
           facilitando o controle de seu orçamento.
         </p>
-        <Button variant="outline">
-          <LogInIcon />
-          Fazer login ou criar sua conta!
-        </Button>
+
+        <SignInButton>
+          <Button variant="outline">
+            <LogInIcon />
+            Fazer login ou criar sua conta!
+          </Button>
+        </SignInButton>
       </div>
 
       {/*DIREITA*/}
