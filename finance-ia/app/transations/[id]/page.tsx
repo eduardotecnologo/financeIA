@@ -1,4 +1,4 @@
-const Transactions = ({ parans: {id}}) =>{
-    return <h1>Transacao: {id}</h1>
-}
-export default Transactions;
+const TransactionsPage = () => {
+  return <h1>Transacao:</h1>;
+};
+export default TransactionsPage;
