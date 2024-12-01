@@ -86,7 +86,7 @@ const UpsertTransactionDialog = ({
     resolver: zodResolver(formSchema),
     defaultValues: defaultValues ?? {
       amount: 50,
-      category: TransactionCategory.OTHER,
+      category: TransactionCategory.Other,
       date: new Date(),
       name: "",
       paymentMethod: TransactionPaymentMethod.CASH,
