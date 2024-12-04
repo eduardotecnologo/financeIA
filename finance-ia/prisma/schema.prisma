@@ -33,15 +33,15 @@ enum TransactionType {
 }
 
 enum TransactionCategory {
-  Housing
-  Transportation
-  Food
-  Entertainment
-  Health
-  Utility
-  Salary
-  Education
-  Other
+  HOUSING
+  TRANSPORTATION
+  FOOD
+  ENTERTAINMENT
+  HEALTH
+  UTILITY
+  SALARY
+  EDUCATION
+  OTHER
 }
 
 enum TransactionPaymentMethod {

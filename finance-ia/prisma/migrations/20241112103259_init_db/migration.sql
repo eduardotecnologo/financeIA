@@ -2,7 +2,7 @@
 CREATE TYPE "TransactionType" AS ENUM ('DEPOSIT', 'EXPENSE', 'INVESTMENT');
 
 -- CreateEnum
-CREATE TYPE "TransactionCategory" AS ENUM ('Housing', 'Transportation', 'Food', 'Entertainment', 'Health', 'Utility', 'Salary', 'Education', 'Other');
+CREATE TYPE "TransactionCategory" AS ENUM ('HOUSING', 'TRANSPORTATION', 'FOOD', 'ENTERTAINMENT', 'HEALTH', 'UTILITY', 'SALARY', 'EDUCATION', 'OTHER');
 
 -- CreateEnum
 CREATE TYPE "TransactionPaymentMethod" AS ENUM ('CREDIT_CARD', 'DEBIT_CARD', 'BANK_TRANSFER', 'BANK_SLIP', 'CASH', 'PIX', 'OTHER');
