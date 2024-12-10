@@ -6,22 +6,22 @@ Estudos Javascript
 
 ## Next JS
 
-https://nextjs.org
+<https://nextjs.org>
 
 ## NeonDB
 
-https://console.neon.tech/app/welcome
+<https://console.neon.tech/app/welcome>
 
 ## Clerk Auth
 
-https://clerk.com
+<https://clerk.com>
 
 ❯ npm install @clerk/nextjs
 ❯ npm install @clerk/themes@2.1.37
 
 ## Hooks
 
-https://git-scm.com/book/ms/v2/Customizing-Git-Git-Hooks
+<https://git-scm.com/book/ms/v2/Customizing-Git-Git-Hooks>
 
 ## husky
 
@@ -30,14 +30,16 @@ https://git-scm.com/book/ms/v2/Customizing-Git-Git-Hooks
 
 ## lint-staged
 
-https://www.npmjs.com/package/lint-staged/v/12.3.2
+<https://www.npmjs.com/package/lint-staged/v/12.3.2>
 ❯ npm i -D lint-staged@12.3.2
 
 ## Prisma
 
-https://www.prisma.io
+<https://www.prisma.io>
 ❯ npm install prisma@5.21.1
 ❯ npx prisma init
+❯ npx prisma studio
+
 
 ## Run
 
@@ -49,12 +51,12 @@ https://www.prisma.io
 
 ## Prettier
 
-https://tailwindcss.com/blog/automatic-class-sorting-with-prettier
+<https://tailwindcss.com/blog/automatic-class-sorting-with-prettier>
 
 ❯ npm install -D prettier prettier-plugin-tailwindcss
 
 ## shadcn
 
-https://ui.shadcn.com
+<https://ui.shadcn.com>
 
 ❯ npx shadcn@2.1.3 add button
