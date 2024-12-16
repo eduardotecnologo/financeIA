@@ -1,17 +1,39 @@
 /* eslint-disable jsx-a11y/alt-text */
+"use client";
+import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
+  const pathname = usePathname();
   return (
-    <nav className="flex justify-between">
-      <div className="items center gap10">
+    <nav className="flex justify-between px-8 py-4 border-b border-solid">
+      <div className="flex items-center gap-10">
         {/*ESQUERDA*/}
         <Image src="/logo.png" width={173} height={39} alt={"Premium.AI"} />
-        <Link href="/">Dashboard</Link>
-        <Link href="/transactions">Transações</Link>
+        <Link
+          href="/"
+          className={
+            pathname === "/" ? "text-primary" : "text-muted-foreground"
+          }
+        >
+          Dashboard
+        </Link>
+        <Link
+          href="/transactions"
+          className={
+            pathname === "/transactions"
+              ? "text-primary"
+              : "text-muted-foreground"
+          }
+        >
+          Transações
+        </Link>
         <Link href="/subscriptions">Assinaturas</Link>
       </div>
+      {/*DIREITA*/}
+      <UserButton showName />
     </nav>
   );
 };
