@@ -5,7 +5,7 @@ import Navbar from "../_components/navbar";
 const SubscriptionPage = async () => {
   const { userId } = await auth();
   if (!userId) {
-    redirect("/loginj");
+    redirect("/login");
   }
   return <Navbar />;
 };

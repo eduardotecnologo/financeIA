@@ -30,7 +30,16 @@ const Navbar = () => {
         >
           Transações
         </Link>
-        <Link href="/subscriptions">Assinaturas</Link>
+        <Link
+          href="/subscriptions"
+          className={
+            pathname === "/subscriptions"
+              ? "text-primary"
+              : "text-muted-foreground"
+          }
+        >
+          Assinaturas
+        </Link>
       </div>
       {/*DIREITA*/}
       <UserButton showName />

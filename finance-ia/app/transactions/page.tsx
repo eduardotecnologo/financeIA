@@ -9,9 +9,13 @@ import { redirect } from "next/navigation";
 const TransactionsPage = async () => {
   const { userId } = await auth();
   if (!userId) {
-    redirect("/loginj");
+    redirect("/login");
   }
-  const transactions = await db.transaction.findMany({});
+  const transactions = await db.transaction.findMany({
+    where: {
+      userId: userId, // Se userId == userId
+    },
+  });
   return (
     <>
       <Navbar />
