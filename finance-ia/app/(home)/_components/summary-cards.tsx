@@ -1,56 +1,64 @@
-import { Card, CardContent, CardHeader } from "@/app/_components/ui/card";
 import {
   PiggyBankIcon,
   TrendingDownIcon,
   TrendingUpIcon,
   WalletIcon,
 } from "lucide-react";
+import SummaryCard from "./summary-card";
+import { db } from "@/app/_lib/prisma";
 
-const SummaryCards = () => {
+const SummaryCards = async () => {
+
+  const depositsTotal = Number((
+    await db.transaction.aggregate({
+    where: {type: "DEPOSIT"},
+    _sum:{amount: true}
+  }))?._sum?.amount,
+);
+
+  const investmentsTotal = Number((
+    await db.transaction.aggregate({
+    where: {type: "INVESTMENT"},
+    _sum:{amount: true},
+  }))?._sum?.amount
+);
+  const expensesTotal = Number((await db.transaction.aggregate({
+    where: {type: "EXPENSE"},
+    _sum:{amount: true}
+  }))?._sum?.amount);
+  
+  const balance = depositsTotal - investmentsTotal - expensesTotal;
+
   return (
     <div className="space-y-6">
       {/*Primeiro Card*/}
-      <Card>
-        <CardHeader>
-          <WalletIcon size={16} />
-          <p className="text-white opacity-70">Saldo</p>
-        </CardHeader>
-        <CardContent>
-          <p className="text-4xl font-bold">R$10.000</p>
-        </CardContent>
-      </Card>
+
+      <SummaryCard 
+        icon={<WalletIcon size={16}/>} 
+        title="Saldo" 
+        amount={balance}
+        size="large"/>
 
       {/*Outros Cards*/}
       <div className="grid grid-cols-3">
-        <Card>
-          <CardHeader className="flex-row items-center gap-2">
-            <PiggyBankIcon size={14} />
-            <p className="text-muted-foreground">Investido</p>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">R$5.000</p>
-          </CardContent>
-        </Card>
+        <SummaryCard 
+        icon={< PiggyBankIcon size={16}/>}
+        title="Investido"
+        amount={investmentsTotal}
+        />
 
-        <Card>
-          <CardHeader>
-            <TrendingUpIcon size={14} />
-            <p className="text-muted-foreground">Receita</p>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">R$15.000</p>
-          </CardContent>
-        </Card>
+      <SummaryCard 
+        icon={< TrendingUpIcon size={16}/>}
+        title="Investido"
+        amount={depositsTotal}
+        />
 
-        <Card>
-          <CardHeader>
-            <TrendingDownIcon size={14} />
-            <p className="text-muted-foreground">Despesas</p>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">R$1.000</p>
-          </CardContent>
-        </Card>
+      <SummaryCard 
+        icon={< TrendingDownIcon size={16}/>}
+        title="Investido"
+        amount={expensesTotal}
+        />
+
       </div>
     </div>
   );
