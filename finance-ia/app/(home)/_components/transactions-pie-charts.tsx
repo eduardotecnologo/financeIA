@@ -19,6 +19,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/app/_components/ui/chart"
+import { TransactionType } from "@prisma/client"
+
 const chartData = [
   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
   { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
@@ -28,32 +30,44 @@ const chartData = [
 ]
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
+    [TransactionType.INVESTMENT]:{
+        label: "Investido",
+        color: "#FFFFFF",
+    },
+    [TransactionType.DEPOSIT]:{
+        label: "Receita",
+        color: "#55B02E",
+    },
+    [TransactionType.EXPENSE]:{
+        label: "Despesas",
+        color: "#E93030",
+    },
 } satisfies ChartConfig
 
-const TransactionsPieCharts = () =>{
+interface TransactionsPieCharts{
+  balance: number;
+  depositsTotal: number;
+  investmentsTotal: number;
+  expensesTotal: number;
+}
+const TransactionsPieCharts = ({depositsTotal,investmentsTotal,expensesTotal,}: TransactionsPieCharts) => {
+  const chartData = [{
+    type: TransactionType.DEPOSIT,
+    amount: depositsTotal,
+    fill: "#FFFFFF",
+  },
+  {
+    type: TransactionType.EXPENSE,
+    amount: expensesTotal,
+    fill: "#E93030",
+  },
+  {
+    type: TransactionType.INVESTMENT,
+    amount: investmentsTotal,
+    fill: "#55B02E",
+  }
+];
+
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -72,21 +86,21 @@ const TransactionsPieCharts = () =>{
             />
             <Pie
               data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              dataKey="amount"
+              nameKey="type"
               innerRadius={60}
             />
           </PieChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
+      {/* <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }
