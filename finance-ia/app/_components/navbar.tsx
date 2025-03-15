@@ -1,5 +1,5 @@
-/* eslint-disable jsx-a11y/alt-text */
 "use client";
+
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,14 +8,16 @@ import { usePathname } from "next/navigation";
 const Navbar = () => {
   const pathname = usePathname();
   return (
-    <nav className="flex justify-between px-8 py-4 border-b border-solid">
+    <nav className="flex justify-between border-b border-solid px-8 py-4">
+      {/* ESQUERDA */}
       <div className="flex items-center gap-10">
-        {/*ESQUERDA*/}
-        <Image src="/logo.png" width={173} height={39} alt={"Premium.AI"} />
+        <Image src="/logo.png" width={173} height={39} alt="Finance AI" />
         <Link
           href="/"
           className={
-            pathname === "/" ? "text-primary" : "text-muted-foreground"
+            pathname === "/"
+              ? "font-bold text-primary"
+              : "text-muted-foreground"
           }
         >
           Dashboard
@@ -24,26 +26,27 @@ const Navbar = () => {
           href="/transactions"
           className={
             pathname === "/transactions"
-              ? "text-primary"
+              ? "font-bold text-primary"
               : "text-muted-foreground"
           }
         >
           Transações
         </Link>
         <Link
-          href="/subscriptions"
+          href="/subscription"
           className={
-            pathname === "/subscriptions"
-              ? "text-primary"
+            pathname === "/subscription"
+              ? "font-bold text-primary"
               : "text-muted-foreground"
           }
         >
-          Assinaturas
+          Assinatura
         </Link>
       </div>
-      {/*DIREITA*/}
+      {/* DIREITA */}
       <UserButton showName />
     </nav>
   );
 };
+
 export default Navbar;
