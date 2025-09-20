@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day Trade Manager</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { text-align: center; color: white; margin-bottom: 30px; }
+    .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    .header p { font-size: 1.1rem; opacity: 0.9; }
+    .card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+    .card h2 { color: #333; margin-bottom: 20px; font-size: 1.5rem; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+    input, select, button, textarea { width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
+    button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
+    button:hover { transform: translateY(-2px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .stat-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
+    .stat-card h3 { font-size: 0.9rem; margin-bottom: 10px; opacity: 0.9; }
+    .stat-card .value { font-size: 1.8rem; font-weight: bold; }
+    .operations-table { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e1e5e9; }
+    th { background-color: #f8f9fa; font-weight: 600; color: #555; }
+    .profit { color: #28a745; font-weight: 600; }
+    .loss { color: #dc3545; font-weight: 600; }
+    .broker-section { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; align-items: start; }
+    .broker-list { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+    .broker-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+    .broker-info h4 { margin-bottom: 5px; color: #333; }
+    .broker-info p { color: #666; font-size: 0.9rem; }
+    .delete-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; }
+    .delete-btn:hover { background: #c82333; }
+    .export-buttons { margin-top: 15px; display: flex; gap: 10px; }
+    .export-buttons button { flex: 1; }
+    .filters { margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+    .filters .form-row { margin-bottom: 0; }
+    .filters h3 { margin-bottom: 15px; color: #333; font-size: 1.2rem; }
+    @media (max-width: 768px) { .broker-section { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📈 Day Trade Manager</h1>
+      <p>Gerencie suas operações de day trade com eficiência</p>
+    </div>
+
+    <!-- Seleção de Corretora -->
+    <div class="card">
+      <h2>🏢 Corretora Ativa</h2>
+      <div class="form-row">
+        <div>
+          <label for="brokerSelect">Selecionar Corretora:</label>
+          <select id="brokerSelect">
+            <option value="">Nenhuma corretora cadastrada</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="card">
+      <h2>📊 Dashboard</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>💰 Banca Inicial</h3>
+          <div class="value" id="statInitial">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>💳 Banca Atual</h3>
+          <div class="value" id="statCurrent">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>📊 Rentabilidade</h3>
+          <div class="value" id="statRoi">0,00%</div>
+        </div>
+        <div class="stat-card">
+          <h3>💸 Total de Saques</h3>
+          <div class="value" id="statWithdrawals">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>📉 Total de Perdas</h3>
+          <div class="value" id="statLosses">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>✅ Win Rate</h3>
+          <div class="value" id="statWinRate">0,00%</div>
+        </div>
+        <div class="stat-card">
+          <h3>📈 Nº de Trades</h3>
+          <div class="value" id="statNumTrades">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>💰 Média Lucro</h3>
+          <div class="value" id="statAvgProfit">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>📉 Média Prejuízo</h3>
+          <div class="value" id="statAvgLoss">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <h3>📅 Cadastrada em</h3>
+          <div class="value" id="statCreated">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registrar Operação -->
+    <div class="card">
+      <h2>📝 Registrar Operação</h2>
+      <form id="operationForm">
+        <div class="form-row">
+          <div>
+            <label for="date">Data:</label>
+            <input type="date" id="date" required>
+          </div>
+          <div>
+            <label for="asset">Ativo:</label>
+            <input type="text" id="asset" placeholder="Ex: PETR4" required>
+          </div>
+          <div>
+            <label for="type">Tipo:</label>
+            <select id="type" required>
+              <option value="">Selecione</option>
+              <option value="buy">Compra</option>
+              <option value="sell">Venda</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="quantity">Quantidade:</label>
+            <input type="number" id="quantity" min="1" required>
+          </div>
+          <div>
+            <label for="entryPrice">Preço de Entrada:</label>
+            <input type="text" id="entryPrice" placeholder="0,00" required>
+          </div>
+          <div>
+            <label for="exitPrice">Preço de Saída:</label>
+            <input type="text" id="exitPrice" placeholder="0,00" required>
+          </div>
+          <div>
+            <label for="fees">Taxas:</label>
+            <input type="text" id="fees" placeholder="0,00" value="0">
+          </div>
+        </div>
+        <button type="submit">Registrar Operação</button>
+      </form>
+    </div>
+
+    <!-- Registrar Saque -->
+    <div class="card">
+      <h2>💸 Registrar Saque</h2>
+      <form id="withdrawForm">
+        <div class="form-row">
+          <div><label for="wdDate">Data:</label><input type="date" id="wdDate" required></div>
+          <div><label for="wdValue">Valor do Saque:</label><input type="text" id="wdValue" placeholder="0,00" required></div>
+        </div>
+        <button type="submit">Lançar Saque</button>
+      </form>
+    </div>
+
+    <!-- Registrar Perda -->
+    <div class="card">
+      <h2>📉 Registrar Perda</h2>
+      <form id="lossForm">
+        <div class="form-row">
+          <div><label for="lossDate">Data:</label><input type="date" id="lossDate" required></div>
+          <div><label for="lossValue">Valor da Perda:</label><input type="text" id="lossValue" placeholder="0,00" required></div>
+        </div>
+        <div><label for="lossObs">Observação (opcional):</label><textarea id="lossObs" rows="2" placeholder="Ex: Multa por zeragem compulsória"></textarea></div>
+        <button type="submit">Lançar Perda</button>
+      </form>
+    </div>
+
+    <!-- Operações -->
+    <div class="card">
+      <h2>📋 Operações</h2>
+      <div class="filters">
+        <h3>Filtros de Operações</h3>
+        <div class="form-row">
+          <div><label for="filterOpStartDate">Data Início:</label><input type="date" id="filterOpStartDate"></div>
+          <div><label for="filterOpEndDate">Data Fim:</label><input type="date" id="filterOpEndDate"></div>
+          <div><label for="filterOpAsset">Ativo:</label><input type="text" id="filterOpAsset" placeholder="Ex: PETR4"></div>
+          <div><button id="applyOpFilters">Aplicar Filtros</button></div>
+          <div><button id="clearOpFilters">Limpar Filtros</button></div>
+        </div>
+      </div>
+      <div class="operations-table">
+        <table id="operationsTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Ativo</th>
+              <th>Tipo</th>
+              <th>Qtd</th>
+              <th>Entrada</th>
+              <th>Saída</th>
+              <th>Taxas</th>
+              <th>Resultado</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="export-buttons">
+        <button id="exportOperationsCSV">Exportar Operações (CSV)</button>
+      </div>
+    </div>
+
+    <!-- Saques (Histórico) -->
+    <div class="card">
+      <h2>📜 Histórico de Saques</h2>
+      <div class="filters">
+        <h3>Filtros de Saques</h3>
+        <div class="form-row">
+          <div><label for="filterWdStartDate">Data Início:</label><input type="date" id="filterWdStartDate"></div>
+          <div><label for="filterWdEndDate">Data Fim:</label><input type="date" id="filterWdEndDate"></div>
+          <div><button id="applyWdFilters">Aplicar Filtros</button></div>
+          <div><button id="clearWdFilters">Limpar Filtros</button></div>
+        </div>
+      </div>
+      <div class="operations-table">
+        <table id="withdrawTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Valor</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="export-buttons">
+        <button id="exportWithdrawalsCSV">Exportar Saques (CSV)</button>
+      </div>
+    </div>
+
+    <!-- Perdas (Histórico) -->
+    <div class="card">
+      <h2>📉 Histórico de Perdas</h2>
+      <div class="filters">
+        <h3>Filtros de Perdas</h3>
+        <div class="form-row">
+          <div><label for="filterLossStartDate">Data Início:</label><input type="date" id="filterLossStartDate"></div>
+          <div><label for="filterLossEndDate">Data Fim:</label><input type="date" id="filterLossEndDate"></div>
+          <div><button id="applyLossFilters">Aplicar Filtros</button></div>
+          <div><button id="clearLossFilters">Limpar Filtros</button></div>
+        </div>
+      </div>
+      <div class="operations-table">
+        <table id="lossTable">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Valor</th>
+              <th>Observação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="export-buttons">
+        <button id="exportLossesCSV">Exportar Perdas (CSV)</button>
+      </div>
+    </div>
+
+    <!-- Gerenciar Corretoras -->
+    <div class="card">
+      <h2>🏦 Gerenciar Corretoras</h2>
+      <div class="broker-section">
+        <div>
+          <h3>Adicionar Nova Corretora</h3>
+          <form id="brokerForm">
+            <div class="form-row">
+              <div>
+                <label for="brokerName">Nome da Corretora:</label>
+                <input type="text" id="brokerName" placeholder="Ex: Clear, Rico, XP" required>
+              </div>
+              <div>
+                <label for="initialDeposit">Banca Inicial:</label>
+                <input type="text" id="initialDeposit" placeholder="1.500,00" required>
+              </div>
+            </div>
+            <button type="submit">Adicionar Corretora</button>
+          </form>
+        </div>
+        <div>
+          <h3>Corretoras Cadastradas</h3>
+          <div class="broker-list" id="brokerList">
+            <p>Nenhuma corretora cadastrada</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Config & Utils =====
+    const KEYS = { brokers: 'dtm_brokers', ops: 'dtm_operations', active: 'dtm_activeBrokerId', wd: 'dtm_withdrawals', losses: 'dtm_losses', opFilters: 'dtm_opFilters', wdFilters: 'dtm_wdFilters', lossFilters: 'dtm_lossFilters' };
+    const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+    const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+    const fmtBRL = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+    const fmtPct = (v) => `${(v || 0).toFixed(2)}%`;
+    const fmtDateBR = (iso) => { try { return new Date(iso).toLocaleDateString('pt-BR'); } catch { return '—'; } };
+    const parseBR = (str) => { if (!str) return 0; return Number(str.toString().replace(/\./g, '').replace(',', '.')) || 0; };
+    const toBR = (num) => (num || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const downloadCSV = (filename, csv) => {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    };
+
+    // ===== Migration =====
+    function migrateBrokers() {
+      let brokers = load(KEYS.brokers, []);
+      let changed = false;
+      brokers = brokers.map(b => {
+        const nb = { ...b };
+        if (nb.initialDeposit == null || Number.isNaN(+nb.initialDeposit)) { nb.initialDeposit = 0; changed = true; }
+        if (!nb.createdAt) { nb.createdAt = new Date().toISOString(); changed = true; }
+        return nb;
+      });
+      if (changed) save(KEYS.brokers, brokers);
+      return brokers;
+    }
+    function ensureActiveBroker(brokers) {
+      let active = localStorage.getItem(KEYS.active);
+      if (!active && brokers.length) { active = String(brokers[0].id); localStorage.setItem(KEYS.active, active); }
+      return active;
+    }
+
+    // ===== Calculations =====
+    function calcBrokerStats(brokerId) {
+      const brokers = migrateBrokers();
+      const ops = load(KEYS.ops, []);
+      const wds = load(KEYS.wd, []);
+      const losses = load(KEYS.losses, []); // Load losses
+      const b = brokers.find(x => String(x.id) === String(brokerId));
+      if (!b) return null;
+
+      const initial = Number(b.initialDeposit) || 0;
+      const myOps = ops.filter(o => String(o.brokerId) === String(brokerId));
+      const myWds = wds.filter(w => String(w.brokerId) === String(brokerId));
+      const myLosses = losses.filter(l => String(l.brokerId) === String(brokerId)); // Filter losses
+
+      const pnl = myOps.reduce((acc, o) => {
+        const qty = Number(o.quantity) || 0;
+        const entry = Number(o.entryPrice) || 0;
+        const exit = Number(o.exitPrice) || 0;
+        const fees = Number(o.fees) || 0;
+        const side = (o.type || '').toLowerCase();
+        const tradePnL = side === 'sell' ? (entry - exit) * qty : (exit - entry) * qty;
+        return acc + (tradePnL - fees);
+      }, 0);
+
+      const wdTotal = myWds.reduce((acc, w) => acc + (Number(w.value) || 0), 0);
+      const lossesTotal = myLosses.reduce((acc, l) => acc + (Number(l.value) || 0), 0); // Calculate total losses
+      const current = initial + pnl - wdTotal - lossesTotal; // Deduct losses from current balance
+
+      // Rentabilidade calculada SEM saques e SEM perdas adicionais
+      const roi = initial > 0 ? (((initial + pnl) / initial) - 1) * 100 : 0;
+
+      // Stats para Win Rate, Num Trades, Avg Profit/Loss
+      const profitableTrades = myOps.filter(op => calcOperationResult(op) > 0);
+      const losingTrades = myOps.filter(op => calcOperationResult(op) < 0);
+      const numTrades = myOps.length;
+      const winRate = numTrades > 0 ? (profitableTrades.length / numTrades) * 100 : 0;
+      const totalProfit = profitableTrades.reduce((sum, op) => sum + calcOperationResult(op), 0);
+      const totalLoss = losingTrades.reduce((sum, op) => sum + calcOperationResult(op), 0);
+      const avgProfit = profitableTrades.length > 0 ? totalProfit / profitableTrades.length : 0;
+      const avgLoss = losingTrades.length > 0 ? totalLoss / losingTrades.length : 0;
+
+      return { broker: b, initial, current, roi, wdTotal, lossesTotal, numTrades, winRate, avgProfit, avgLoss };
+    }
+
+    function calcOperationResult(op) {
+      const qty = Number(op.quantity) || 0;
+      const entry = Number(op.entryPrice) || 0;
+      const exit = Number(op.exitPrice) || 0;
+      const fees = Number(op.fees) || 0;
+      const side = (op.type || '').toLowerCase();
+      const tradePnL = side === 'sell' ? (entry - exit) * qty : (exit - entry) * qty;
+      return tradePnL - fees;
+    }
+
+    // ===== UI =====
+    function updateStats() {
+      const active = document.getElementById('brokerSelect').value || localStorage.getItem(KEYS.active);
+      if (!active) {
+        document.getElementById('statInitial').textContent = 'R$ 0,00';
+        document.getElementById('statCurrent').textContent = 'R$ 0,00';
+        document.getElementById('statRoi').textContent = '0,00%';
+        document.getElementById('statCreated').textContent = '—';
+        document.getElementById('statWithdrawals').textContent = 'R$ 0,00';
+        document.getElementById('statLosses').textContent = 'R$ 0,00'; // Update new stat
+        document.getElementById('statWinRate').textContent = '0,00%';
+        document.getElementById('statNumTrades').textContent = '0';
+        document.getElementById('statAvgProfit').textContent = 'R$ 0,00';
+        document.getElementById('statAvgLoss').textContent = 'R$ 0,00';
+        return;
+      }
+      localStorage.setItem(KEYS.active, String(active));
+      const stats = calcBrokerStats(active);
+      if (!stats) return;
+
+      document.getElementById('statInitial').textContent = fmtBRL(stats.initial);
+      document.getElementById('statCurrent').textContent = fmtBRL(stats.current);
+      document.getElementById('statRoi').textContent = fmtPct(stats.roi);
+      document.getElementById('statCreated').textContent = fmtDateBR(stats.broker.createdAt);
+      document.getElementById('statWithdrawals').textContent = fmtBRL(stats.wdTotal);
+      document.getElementById('statLosses').textContent = fmtBRL(stats.lossesTotal); // Display total losses
+      document.getElementById('statWinRate').textContent = fmtPct(stats.winRate);
+      document.getElementById('statNumTrades').textContent = stats.numTrades;
+      document.getElementById('statAvgProfit').textContent = fmtBRL(stats.avgProfit);
+      document.getElementById('statAvgLoss').textContent = fmtBRL(stats.avgLoss);
+    }
+
+    function renderBrokers() {
+      const brokers = migrateBrokers();
+      const active = ensureActiveBroker(brokers);
+      const select = document.getElementById('brokerSelect');
+      if (brokers.length === 0) {
+        select.innerHTML = '<option value="">Nenhuma corretora cadastrada</option>';
+      } else {
+        select.innerHTML = brokers.map(b => `<option value="${b.id}" ${String(b.id) === String(active) ? 'selected' : ''}>${b.name} - ${fmtBRL(b.initialDeposit)}</option>`).join('');
+      }
+      updateStats();
+      renderOperations();
+      renderWithdrawals();
+      renderLosses(); // Render losses
+      renderBrokerList();
+    }
+
+    function renderBrokerList() {
+      const brokers = migrateBrokers();
+      const list = document.getElementById('brokerList');
+      if (!list) return;
+      if (brokers.length === 0) { list.innerHTML = '<p>Nenhuma corretora cadastrada</p>'; return; }
+      list.innerHTML = brokers.map(b => `
+        <div class="broker-item">
+          <div class="broker-info">
+            <h4>${b.name}</h4>
+            <p>Banca: ${fmtBRL(b.initialDeposit)} | Cadastrada: ${fmtDateBR(b.createdAt)}</p>
+          </div>
+          <button class="delete-btn" onclick="deleteBroker(${b.id})">Excluir</button>
+        </div>
+      `).join('');
+    }
+
+    function renderOperations() {
+      const active = localStorage.getItem(KEYS.active);
+      let ops = load(KEYS.ops, []);
+      let myOps = ops.filter(o => String(o.brokerId) === String(active));
+
+      // Apply filters
+      const filters = load(KEYS.opFilters, {});
+      if (filters.startDate) myOps = myOps.filter(o => o.date >= filters.startDate);
+      if (filters.endDate) myOps = myOps.filter(o => o.date <= filters.endDate);
+      if (filters.asset) myOps = myOps.filter(o => o.asset.toLowerCase().includes(filters.asset.toLowerCase()));
+
+      const tbody = document.querySelector('#operationsTable tbody');
+      if (!tbody) return;
+      if (myOps.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Nenhuma operação registrada</td></tr>'; return; }
+      tbody.innerHTML = myOps.map(op => {
+        const result = calcOperationResult(op);
+        const resultClass = result >= 0 ? 'profit' : 'loss';
+        const typeText = op.type === 'buy' ? 'Compra' : 'Venda';
+        return `
+          <tr>
+            <td>${fmtDateBR(op.date)}</td>
+            <td>${op.asset}</td>
+            <td>${typeText}</td>
+            <td>${op.quantity}</td>
+            <td>${fmtBRL(op.entryPrice)}</td>
+            <td>${fmtBRL(op.exitPrice)}</td>
+            <td>${fmtBRL(op.fees)}</td>
+            <td class="${resultClass}">${fmtBRL(result)}</td>
+            <td><button class="delete-btn" onclick="deleteOperation(${op.id})">Excluir</button></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderWithdrawals() {
+      const active = localStorage.getItem(KEYS.active);
+      let wds = load(KEYS.wd, []);
+      let myWds = wds.filter(w => String(w.brokerId) === String(active));
+
+      // Apply filters
+      const filters = load(KEYS.wdFilters, {});
+      if (filters.startDate) myWds = myWds.filter(w => w.date >= filters.startDate);
+      if (filters.endDate) myWds = myWds.filter(w => w.date <= filters.endDate);
+
+      const tbody = document.querySelector('#withdrawTable tbody');
+      if (!tbody) return;
+      if (myWds.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum saque</td></tr>'; return; }
+      tbody.innerHTML = myWds.map(w => `
+        <tr>
+          <td>${fmtDateBR(w.date)}</td>
+          <td>${fmtBRL(w.value)}</td>
+          <td><button class="delete-btn" onclick="deleteWithdrawal(${w.id})">Excluir</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderLosses() {
+      const active = localStorage.getItem(KEYS.active);
+      let losses = load(KEYS.losses, []);
+      let myLosses = losses.filter(l => String(l.brokerId) === String(active));
+
+      // Apply filters
+      const filters = load(KEYS.lossFilters, {});
+      if (filters.startDate) myLosses = myLosses.filter(l => l.date >= filters.startDate);
+      if (filters.endDate) myLosses = myLosses.filter(l => l.date <= filters.endDate);
+
+      const tbody = document.querySelector('#lossTable tbody');
+      if (!tbody) return;
+      if (myLosses.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma perda registrada</td></tr>'; return; }
+      tbody.innerHTML = myLosses.map(l => `
+        <tr>
+          <td>${fmtDateBR(l.date)}</td>
+          <td>${fmtBRL(l.value)}</td>
+          <td>${l.obs || '—'}</td>
+          <td><button class="delete-btn" onclick="deleteLoss(${l.id})">Excluir</button></td>
+        </tr>
+      `).join('');
+    }
+
+    // ===== Actions =====
+    function addBroker(name, initialDeposit) {
+      const brokers = migrateBrokers();
+      const id = Date.now();
+      const createdAt = new Date().toISOString();
+      brokers.push({ id, name, initialDeposit: Number(initialDeposit) || 0, createdAt });
+      save(KEYS.brokers, brokers);
+      localStorage.setItem(KEYS.active, String(id));
+      renderBrokers();
+      renderBrokerList();
+    }
+
+    function deleteBroker(id) {
+      if (!confirm('Tem certeza que deseja excluir esta corretora? Todas as operações, saques e perdas relacionados também serão excluídos.')) return;
+      let brokers = load(KEYS.brokers, []);
+      let ops = load(KEYS.ops, []);
+      let wds = load(KEYS.wd, []);
+      let losses = load(KEYS.losses, []);
+      brokers = brokers.filter(b => b.id !== id);
+      ops = ops.filter(o => String(o.brokerId) !== String(id));
+      wds = wds.filter(w => String(w.brokerId) !== String(id));
+      losses = losses.filter(l => String(l.brokerId) !== String(id));
+      save(KEYS.brokers, brokers);
+      save(KEYS.ops, ops);
+      save(KEYS.wd, wds);
+      save(KEYS.losses, losses);
+      if (String(localStorage.getItem(KEYS.active)) === String(id)) { localStorage.removeItem(KEYS.active); }
+      renderBrokers();
+      renderBrokerList();
+      renderOperations();
+      renderWithdrawals();
+      renderLosses();
+    }
+
+    function addOperation(opData) {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora primeiro!'); return; }
+      const ops = load(KEYS.ops, []);
+      const id = Date.now();
+      ops.push({ id, brokerId: String(active), ...opData });
+      save(KEYS.ops, ops);
+      updateStats();
+      renderOperations();
+    }
+
+    function deleteOperation(id) {
+      if (!confirm('Tem certeza que deseja excluir esta operação?')) return;
+      let ops = load(KEYS.ops, []);
+      ops = ops.filter(o => o.id !== id);
+      save(KEYS.ops, ops);
+      updateStats();
+      renderOperations();
+    }
+
+    function addWithdrawal(wData) {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora primeiro!'); return; }
+      const wds = load(KEYS.wd, []);
+      const id = Date.now();
+      wds.push({ id, brokerId: String(active), ...wData });
+      save(KEYS.wd, wds);
+      updateStats();
+      renderWithdrawals();
+    }
+
+    function deleteWithdrawal(id) {
+      if (!confirm('Tem certeza que deseja excluir este saque?')) return;
+      let wds = load(KEYS.wd, []);
+      wds = wds.filter(w => w.id !== id);
+      save(KEYS.wd, wds);
+      updateStats();
+      renderWithdrawals();
+    }
+
+    function addLoss(lossData) {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora primeiro!'); return; }
+      const losses = load(KEYS.losses, []);
+      const id = Date.now();
+      losses.push({ id, brokerId: String(active), ...lossData });
+      save(KEYS.losses, losses);
+      updateStats();
+      renderLosses();
+    }
+
+    function deleteLoss(id) {
+      if (!confirm('Tem certeza que deseja excluir esta perda?')) return;
+      let losses = load(KEYS.losses, []);
+      losses = losses.filter(l => l.id !== id);
+      save(KEYS.losses, losses);
+      updateStats();
+      renderLosses();
+    }
+
+    function exportOperationsCSV() {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora para exportar as operações!'); return; }
+      let ops = load(KEYS.ops, []).filter(o => String(o.brokerId) === String(active));
+
+      // Apply filters to exported data
+      const filters = load(KEYS.opFilters, {});
+      if (filters.startDate) ops = ops.filter(o => o.date >= filters.startDate);
+      if (filters.endDate) ops = ops.filter(o => o.date <= filters.endDate);
+      if (filters.asset) ops = ops.filter(o => o.asset.toLowerCase().includes(filters.asset.toLowerCase()));
+
+      const headers = ['Data', 'Ativo', 'Tipo', 'Quantidade', 'Entrada', 'Saída', 'Taxas', 'Resultado'];
+      const csvRows = [headers.join(';')];
+      ops.forEach(op => {
+        const result = calcOperationResult(op);
+        const row = [
+          fmtDateBR(op.date),
+          op.asset,
+          op.type === 'buy' ? 'Compra' : 'Venda',
+          op.quantity,
+          toBR(op.entryPrice),
+          toBR(op.exitPrice),
+          toBR(op.fees),
+          toBR(result)
+        ];
+        csvRows.push(row.join(';'));
+      });
+      const brokerName = migrateBrokers().find(b => String(b.id) === String(active))?.name || 'Corretora';
+      downloadCSV(`${brokerName}_operacoes.csv`, csvRows.join('\n'));
+    }
+
+    function exportWithdrawalsCSV() {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora para exportar os saques!'); return; }
+      let wds = load(KEYS.wd, []).filter(w => String(w.brokerId) === String(active));
+
+      // Apply filters to exported data
+      const filters = load(KEYS.wdFilters, {});
+      if (filters.startDate) wds = wds.filter(w => w.date >= filters.startDate);
+      if (filters.endDate) wds = wds.filter(w => w.date <= filters.endDate);
+
+      const headers = ['Data', 'Valor'];
+      const csvRows = [headers.join(';')];
+      wds.forEach(w => {
+        const row = [
+          fmtDateBR(w.date),
+          toBR(w.value)
+        ];
+        csvRows.push(row.join(';'));
+      });
+      const brokerName = migrateBrokers().find(b => String(b.id) === String(active))?.name || 'Corretora';
+      downloadCSV(`${brokerName}_saques.csv`, csvRows.join('\n'));
+    }
+
+    function exportLossesCSV() {
+      const active = localStorage.getItem(KEYS.active);
+      if (!active) { alert('Selecione uma corretora para exportar as perdas!'); return; }
+      let losses = load(KEYS.losses, []).filter(l => String(l.brokerId) === String(active));
+
+      // Apply filters to exported data
+      const filters = load(KEYS.lossFilters, {});
+      if (filters.startDate) losses = losses.filter(l => l.date >= filters.startDate);
+      if (filters.endDate) losses = losses.filter(l => l.date <= filters.endDate);
+
+      const headers = ['Data', 'Valor', 'Observacao'];
+      const csvRows = [headers.join(';')];
+      losses.forEach(l => {
+        const row = [
+          fmtDateBR(l.date),
+          toBR(l.value),
+          l.obs || ''
+        ];
+        csvRows.push(row.join(';'));
+      });
+      const brokerName = migrateBrokers().find(b => String(b.id) === String(active))?.name || 'Corretora';
+      downloadCSV(`${brokerName}_perdas.csv`, csvRows.join('\n'));
+    }
+
+    // ===== Forms =====
+    document.getElementById('brokerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('brokerName').value.trim();
+      const deposit = parseBR(document.getElementById('initialDeposit').value);
+      if (!name) { alert('Nome da corretora é obrigatório!'); return; }
+      addBroker(name, deposit);
+      e.target.reset();
+    });
+
+    document.getElementById('operationForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const asset = document.getElementById('asset').value.trim().toUpperCase();
+      const type  = document.getElementById('type').value;
+      const quantity = Number(document.getElementById('quantity').value);
+      const entryPrice = parseBR(document.getElementById('entryPrice').value);
+      const exitPrice  = parseBR(document.getElementById('exitPrice').value);
+      const fees       = parseBR(document.getElementById('fees').value);
+      if (!asset || !type || !quantity) { alert('Preencha todos os campos obrigatórios!'); return; }
+      const opData = { date, asset, type, quantity, entryPrice, exitPrice, fees };
+      addOperation(opData);
+      e.target.reset();
+      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    });
+
+    document.getElementById('withdrawForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const date = document.getElementById('wdDate').value;
+      const value = parseBR(document.getElementById('wdValue').value);
+      if (!value) { alert('Informe um valor de saque válido.'); return; }
+      addWithdrawal({ date, value });
+      e.target.reset();
+      document.getElementById('wdDate').value = new Date().toISOString().split('T')[0];
+    });
+
+    document.getElementById('lossForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const date = document.getElementById('lossDate').value;
+      const value = parseBR(document.getElementById('lossValue').value);
+      const obs = document.getElementById('lossObs').value.trim();
+      if (!value) { alert('Informe um valor de perda válido.'); return; }
+      addLoss({ date, value, obs });
+      e.target.reset();
+      document.getElementById('lossDate').value = new Date().toISOString().split('T')[0];
+    });
+
+    document.getElementById('brokerSelect').addEventListener('change', () => {
+      const active = document.getElementById('brokerSelect').value;
+      localStorage.setItem(KEYS.active, active);
+      // Clear filters when changing broker
+      save(KEYS.opFilters, {});
+      save(KEYS.wdFilters, {});
+      save(KEYS.lossFilters, {});
+      loadOpFilters();
+      loadWdFilters();
+      loadLossFilters();
+      updateStats();
+      renderOperations();
+      renderWithdrawals();
+      renderLosses();
+    });
+
+    // ===== Filters =====
+    function applyOperationFilters() {
+      const startDate = document.getElementById('filterOpStartDate').value;
+      const endDate = document.getElementById('filterOpEndDate').value;
+      const asset = document.getElementById('filterOpAsset').value.trim();
+      save(KEYS.opFilters, { startDate, endDate, asset });
+      renderOperations();
+    }
+
+    function clearOperationFilters() {
+      save(KEYS.opFilters, {});
+      document.getElementById('filterOpStartDate').value = '';
+      document.getElementById('filterOpEndDate').value = '';
+      document.getElementById('filterOpAsset').value = '';
+      renderOperations();
+    }
+
+    function loadOpFilters() {
+      const filters = load(KEYS.opFilters, {});
+      document.getElementById('filterOpStartDate').value = filters.startDate || '';
+      document.getElementById('filterOpEndDate').value = filters.endDate || '';
+      document.getElementById('filterOpAsset').value = filters.asset || '';
+    }
+
+    function applyWithdrawalFilters() {
+      const startDate = document.getElementById('filterWdStartDate').value;
+      const endDate = document.getElementById('filterWdEndDate').value;
+      save(KEYS.wdFilters, { startDate, endDate });
+      renderWithdrawals();
+    }
+
+    function clearWithdrawalFilters() {
+      save(KEYS.wdFilters, {});
+      document.getElementById('filterWdStartDate').value = '';
+      document.getElementById('filterWdEndDate').value = '';
+      renderWithdrawals();
+    }
+
+    function loadWdFilters() {
+      const filters = load(KEYS.wdFilters, {});
+      document.getElementById('filterWdStartDate').value = filters.startDate || '';
+      document.getElementById('filterWdEndDate').value = filters.endDate || '';
+    }
+
+    function applyLossFilters() {
+      const startDate = document.getElementById('filterLossStartDate').value;
+      const endDate = document.getElementById('filterLossEndDate').value;
+      save(KEYS.lossFilters, { startDate, endDate });
+      renderLosses();
+    }
+
+    function clearLossFilters() {
+      save(KEYS.lossFilters, {});
+      document.getElementById('filterLossStartDate').value = '';
+      document.getElementById('filterLossEndDate').value = '';
+      renderLosses();
+    }
+
+    function loadLossFilters() {
+      const filters = load(KEYS.lossFilters, {});
+      document.getElementById('filterLossStartDate').value = filters.startDate || '';
+      document.getElementById('filterLossEndDate').value = filters.endDate || '';
+    }
+
+    // Mascara amigável para campos monetários
+    ;['entryPrice','exitPrice','fees','initialDeposit','wdValue','lossValue'].forEach(id => {
+      const input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener('input', (e) => {
+        let raw = e.target.value.replace(/\D/g, '');
+        if (!raw) { e.target.value = ''; return; }
+        const num = Number(raw) / 100;
+        e.target.value = toBR(num);
+      });
+    });
+
+    // ===== Event Listeners =====
+    document.getElementById('exportOperationsCSV').addEventListener('click', exportOperationsCSV);
+    document.getElementById('exportWithdrawalsCSV').addEventListener('click', exportWithdrawalsCSV);
+    document.getElementById('exportLossesCSV').addEventListener('click', exportLossesCSV);
+    document.getElementById('applyOpFilters').addEventListener('click', applyOperationFilters);
+    document.getElementById('clearOpFilters').addEventListener('click', clearOperationFilters);
+    document.getElementById('applyWdFilters').addEventListener('click', applyWithdrawalFilters);
+    document.getElementById('clearWdFilters').addEventListener('click', clearWithdrawalFilters);
+    document.getElementById('applyLossFilters').addEventListener('click', applyLossFilters);
+    document.getElementById('clearLossFilters').addEventListener('click', clearLossFilters);
+
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('wdDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('lossDate').value = new Date().toISOString().split('T')[0];
+      loadOpFilters();
+      loadWdFilters();
+      loadLossFilters();
+      renderBrokers();
+    });
+  </script>
+</body>
+</html>
