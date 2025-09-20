@@ -20,8 +20,7 @@
     button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; cursor: pointer; font-weight: 600; transition: transform 0.2s; }
     button:hover { transform: translateY(-2px); }
     button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    .stls
-    ats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
     .stat-card { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
     .stat-card h3 { font-size: 0.9rem; margin-bottom: 10px; opacity: 0.9; }
     .stat-card .value { font-size: 1.8rem; font-weight: bold; }
@@ -305,6 +304,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Rodapé com Lucro Total -->
+    <div class="card" style="margin-bottom:0;">
+      <h2>💵 Lucro Total</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Somatório dos Saques</h3>
+          <div class="value profit" id="statTotalProfit">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -414,7 +424,7 @@
         document.getElementById('statRoi').textContent = '0,00%';
         document.getElementById('statCreated').textContent = '—';
         document.getElementById('statWithdrawals').textContent = 'R$ 0,00';
-        document.getElementById('statLosses').textContent = 'R$ 0,00'; // Update new stat
+        document.getElementById('statLosses').textContent = 'R$ 0,00';
         document.getElementById('statWinRate').textContent = '0,00%';
         document.getElementById('statNumTrades').textContent = '0';
         document.getElementById('statAvgProfit').textContent = 'R$ 0,00';
@@ -430,7 +440,19 @@
       document.getElementById('statRoi').textContent = fmtPct(stats.roi);
       document.getElementById('statCreated').textContent = fmtDateBR(stats.broker.createdAt);
       document.getElementById('statWithdrawals').textContent = fmtBRL(stats.wdTotal);
-      document.getElementById('statLosses').textContent = fmtBRL(stats.lossesTotal); // Display total losses
+
+      // Se não houver histórico de perdas, exibe o card como positivo
+      const losses = load(KEYS.losses, []).filter(l => String(l.brokerId) === String(active));
+      if (losses.length === 0) {
+        document.getElementById('statLosses').textContent = 'R$ 0,00';
+        document.getElementById('statLosses').classList.remove('loss');
+        document.getElementById('statLosses').classList.add('profit');
+      } else {
+        document.getElementById('statLosses').textContent = fmtBRL(stats.lossesTotal);
+        document.getElementById('statLosses').classList.remove('profit');
+        document.getElementById('statLosses').classList.add('loss');
+      }
+
       document.getElementById('statWinRate').textContent = fmtPct(stats.winRate);
       document.getElementById('statNumTrades').textContent = stats.numTrades;
       document.getElementById('statAvgProfit').textContent = fmtBRL(stats.avgProfit);
@@ -449,8 +471,9 @@
       updateStats();
       renderOperations();
       renderWithdrawals();
-      renderLosses(); // Render losses
+      renderLosses();
       renderBrokerList();
+      updateTotalProfit(); // Atualiza Lucro Total
     }
 
     function renderBrokerList() {
@@ -523,6 +546,7 @@
           <td><button class="delete-btn" onclick="deleteWithdrawal(${w.id})">Excluir</button></td>
         </tr>
       `).join('');
+      updateTotalProfit(); // Atualiza Lucro Total
     }
 
     function renderLosses() {
@@ -781,6 +805,7 @@
       renderOperations();
       renderWithdrawals();
       renderLosses();
+      updateTotalProfit(); // Atualiza Lucro Total
     });
 
     // ===== Filters =====
@@ -879,7 +904,15 @@
       loadWdFilters();
       loadLossFilters();
       renderBrokers();
+      updateTotalProfit(); // Atualiza Lucro Total ao iniciar
     });
+
+    function updateTotalProfit() {
+      // Soma todos os saques de todas as corretoras
+      const wds = load(KEYS.wd, []);
+      const totalProfit = wds.reduce((acc, w) => acc + (Number(w.value) || 0), 0);
+      document.getElementById('statTotalProfit').textContent = fmtBRL(totalProfit);
+    }
   </script>
 </body>
 </html>
