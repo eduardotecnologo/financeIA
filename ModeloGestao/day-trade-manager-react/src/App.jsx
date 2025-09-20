@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Dashboard from './components/Dashboard';
 import BrokerSelect from './components/BrokerSelect';
 import BrokerForm from './components/BrokerForm';
 import './App.css';
@@ -36,6 +37,8 @@ function App() {
     localStorage.setItem('dtm_activeBrokerId', broker.id);
   };
 
+  const activeBroker = brokers.find(b => b.id === activeBrokerId);
+
   return(
     <div className="container">
       <div className='header'>
@@ -47,7 +50,9 @@ function App() {
         brokers={brokers} 
         activeBrokerId={activeBrokerId} 
         onChange={setActiveBrokerId} />
+        <Dashboard broker={activeBroker} />
         <BrokerForm onAddBroker={handleAddBroker} />
+        
       </div>
   );
 }
