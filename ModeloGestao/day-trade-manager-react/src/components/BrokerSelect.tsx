@@ -1,6 +1,18 @@
 import React, {useEffect, useState} from 'react';
 
-function BrokerSelect({brokers, activeBrokerId, onChange}) 
+type Broker = {
+    id: string | number;
+    name: string;
+    initialDeposit: number;
+};
+
+type BrokerSelectProps = {
+    brokers: Broker[];
+    activeBrokerId: string | number | null;
+    onChange: (brokerId: string | number) => void;
+};
+
+function BrokerSelect({brokers, activeBrokerId, onChange}: BrokerSelectProps) 
 {
     return(
         <div className='card'>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BrokerSelect from './components/BrokerSelect';
+import BrokerForm from './components/BrokerForm';
 import './App.css';
 
 function App() {
@@ -26,16 +27,27 @@ function App() {
     }
   }, [activeBrokerId]);
 
+  // Função para adicionar corretora
+  const handleAddBroker = (broker) => {
+    const updatedBrokers = [...brokers, broker];
+    setBrokers(updatedBrokers);
+    localStorage.setItem('dtm_brokers', JSON.stringify(updatedBrokers));
+    setActiveBrokerId(broker.id);
+    localStorage.setItem('dtm_activeBrokerId', broker.id);
+  };
+
   return(
     <div className="container">
       <div className='header'>
       <h1>📈 Day Trade Manager</h1>
       <p>Gerencie suas operações de day trade com facilidade.</p>
       </div>
+      {/* Adicione os outros componentes aqui */}
       <BrokerSelect 
         brokers={brokers} 
         activeBrokerId={activeBrokerId} 
         onChange={setActiveBrokerId} />
+        <BrokerForm onAddBroker={handleAddBroker} />
       </div>
   );
 }
